@@ -45,8 +45,11 @@ async fn main() {
 
         tasks.push(task);
     }
-
+    let mut done: u32 = 0;
     for task in tasks {
         task.await.unwrap();
+
+        done += 1;
     }
+    dbg!(done);
 }
