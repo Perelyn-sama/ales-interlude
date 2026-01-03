@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use quinn::{Endpoint, IdleTimeout, ServerConfig, TransportConfig, VarInt};
+use quinn::{Connection, Endpoint, IdleTimeout, ServerConfig, TransportConfig, VarInt};
 use rustls::pki_types::PrivateKeyDer;
 use std::{
     array,
@@ -36,33 +36,35 @@ async fn main() {
 
     let addr = SocketAddr::new(IpAddr::V6(Ipv6Addr::LOCALHOST), 8080);
 
-    dbg!(addr.to_string());
-
     let server = Endpoint::server(server_config, addr).unwrap();
 
     while let Some(connecting) = server.accept().await {
         let conn = connecting.await.unwrap();
-        let mut chunks: [Bytes; 4] = array::from_fn(|_| Bytes::new());
+        let chunks: [Bytes; 4] = array::from_fn(|_| Bytes::new());
 
-        tokio::task::spawn(async move {
-            loop {
-                match conn.accept_uni().await {
-                    Ok(mut recv_stream) => loop {
-                        match recv_stream.read_chunks(&mut chunks).await {
-                            Ok(n) => {
-                                if n.is_none() {
-                                    break;
-                                }
-                            }
-                            Err(e) => {
-                                eprint!("{}", e);
+        handle_connection(conn, chunks).await;
+    }
+}
+
+async fn handle_connection(conn: Connection, mut chunks: [Bytes; 4]) {
+    tokio::task::spawn(async move {
+        loop {
+            match conn.accept_uni().await {
+                Ok(mut recv_stream) => loop {
+                    match recv_stream.read_chunks(&mut chunks).await {
+                        Ok(n) => {
+                            if n.is_none() {
                                 break;
                             }
                         }
-                    },
-                    Err(_) => break,
-                }
+                        Err(e) => {
+                            eprint!("{}", e);
+                            break;
+                        }
+                    }
+                },
+                Err(_) => break,
             }
-        });
-    }
+        }
+    });
 }

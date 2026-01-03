@@ -28,7 +28,7 @@ async fn main() {
     client_config.transport_config(transport_config);
 
     let mut tasks = Vec::new();
-    let streams = 100_000; // 10m streams
+    let streams = 20_000; // 2m streams
 
     for _ in 0..100 {
         let client = client.clone();

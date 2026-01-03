@@ -11,3 +11,14 @@
 - Open multiple connections 
 - one task per connection 
 - one each connection, open_uni(), write 1k in a loop asap
+
+
+run server 
+```
+CARGO_BUILD_PROFILE=release-with-debug cargo run --bin server 
+```
+
+run clinet 
+```
+CARGO_BUILD_PROFILE=release-with-debug cargo run --bin client
+```
