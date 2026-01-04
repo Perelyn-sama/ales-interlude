@@ -24,10 +24,14 @@ async fn main() {
     let timeout = IdleTimeout::try_from(Duration::from_secs(20)).unwrap();
     transport_config.max_concurrent_uni_streams(VarInt::from_u32(100000));
     transport_config.max_idle_timeout(Some(timeout));
+    transport_config.keep_alive_interval(Some(Duration::from_secs(15)));
     let transport_config = Arc::new(transport_config);
     client_config.transport_config(transport_config);
 
-    let mut tasks = Vec::new();
+    send_streams(client, client_config, server_addr).await;
+}
+
+async fn send_streams(client: Arc<Endpoint>, client_config: ClientConfig, server_addr: SocketAddr) {
     let streams = 20_000; // 2m streams
 
     for _ in 0..100 {
@@ -48,13 +52,6 @@ async fn main() {
             }
         });
 
-        tasks.push(task);
-    }
-    let mut done: u32 = 0;
-    for task in tasks {
         task.await.unwrap();
-
-        done += 1;
-        dbg!(done);
     }
 }

@@ -15,10 +15,10 @@
 
 run server 
 ```
-CARGO_BUILD_PROFILE=release-with-debug cargo run --bin server 
+cargo run --bin server --release
 ```
 
 run clinet 
 ```
-CARGO_BUILD_PROFILE=release-with-debug cargo run --bin client
+cargo run --bin client  --release
 ```
